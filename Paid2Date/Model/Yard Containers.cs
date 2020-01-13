@@ -40,8 +40,8 @@ namespace Paid2Date.Model
             updateCommand.ActiveConnection = DEVN4Connection;
             updateCommand.CommandText = $@"
 UPDATE [apex].[dbo].[inv_unit_fcy_visit]
-   SET [paid_thru_day] = {Storage}
-	    ,[power_paid_thru_day] = {Electricity}
+   SET [flex_date01] = {Storage}
+	    ,[flex_date02] = {Electricity}
  WHERE unit_gkey = {Gkey}
 ";
             updateCommand.Execute(out object dsad, 0, 0);

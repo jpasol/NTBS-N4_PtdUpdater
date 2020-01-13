@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Paid2Date", "Paid2Date\Paid2Date.csproj", "{549F9ED7-FE50-4E5C-93E9-0725EA74BFD8}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Reports Interface", "..\..\..\Desktop\Repository\OP Dox Reports\ITS – Operations Automation of Reports\Project1\Reports Interface.vbproj", "{19315380-B270-43B7-83B7-AC163B6F79CD}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Reports Interface", "..\OP Dox Reports\ITS – Operations Automation of Reports\Project1\Reports Interface.vbproj", "{19315380-B270-43B7-83B7-AC163B6F79CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
