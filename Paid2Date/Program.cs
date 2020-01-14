@@ -51,7 +51,7 @@ namespace Paid2Date
                                                         !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
                                                         :
                                                         yardContainer.Category == "IMPRT" ? Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //paid thru date = free until (ldd+9)
-                                                        : yardContainer.TimeIn;                                                  
+                                                        : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);                                                  
                         //return plugin
                         yardContainer.PlugIn =
                                 !string.IsNullOrEmpty(plugin) ? Convert.ToDateTime(plugin) :
@@ -84,7 +84,7 @@ namespace Paid2Date
                         Convert.ToDateTime(yardContainer.PaidThruDate).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (ext.ChargeType.Contains("STOIM"))).FirstOrDefault().Quantity)
+                                                                        && (ext.ChargeType.Contains("STOI"))).FirstOrDefault().Quantity)
                         :
                         Convert.ToDateTime(yardContainer.TimeIn).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
@@ -96,12 +96,25 @@ namespace Paid2Date
                         Convert.ToDateTime(yardContainer.PlugOut).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (ext.ChargeType.Contains("MCRFC"))).FirstOrDefault().Quantity)
+                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
                         :
                         Convert.ToDateTime(yardContainer.PlugOut).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                        && (ext.ChargeType.Contains("MCRFC"))).FirstOrDefault().Quantity)
+                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
+                        ;
+
+                    yardContainer.PlugOut =
+                        yardContainer.Category == "IMPRT" ?
+                        Convert.ToDateTime(yardContainer.PlugOut).
+                        AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                        && (yardContainer.ATA <= ext.SystemDate)
+                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
+                        :
+                        Convert.ToDateTime(yardContainer.PlugOut).
+                        AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                        && (yardContainer.TimeIn <= ext.SystemDate)
+                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
                         ;
                 }
                 catch { }

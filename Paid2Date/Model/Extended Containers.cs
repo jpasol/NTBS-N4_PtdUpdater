@@ -72,7 +72,7 @@ SELECT [refnum]
       ,[outdttm]
       ,[IsN4ReeferPaymentUpdated]
       ,[CompanyCode]
-  FROM [billing].[dbo].[CCRdtl] where status <> 'CAN' and chargetyp like '%MCRFC%' or chargetyp like '%STOIM%'
+  FROM [billing].[dbo].[CCRdtl] where status <> 'CAN' and chargetyp like '%MCRFC%' or chargetyp like '%STOI%' or chargetyp like '%STOEX%'
 ";
             System.Data.DataTable _EXTContainersTable = new System.Data.DataTable();
             System.Data.OleDb.OleDbDataAdapter adapter = new System.Data.OleDb.OleDbDataAdapter();
