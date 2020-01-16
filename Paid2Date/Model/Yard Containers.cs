@@ -24,6 +24,7 @@ namespace Paid2Date.Model
         public DateTime? TimeIn;
         public DateTime? ATA;
         public DateTime? ETD;
+        public DateTime? LastFreeDay;
 
         public void UpdateN4Unit()
         {
@@ -68,6 +69,7 @@ SELECT iu.id 'Container Number'
 ,time_in
 ,time_discharge_complete
 ,iu.gkey
+,last_free_day
 
 FROM [apex].[dbo].inv_unit iu 
 inner join inv_unit_fcy_visit iufv on iufv.unit_gkey = iu.gkey
@@ -108,6 +110,8 @@ where transit_state like '%YARD%'
                 string date = dr["time_in"].ToString();
                 _yardContainer.TimeIn = string.IsNullOrEmpty(date) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(date);
 
+                string lfd = dr["last_free_day"].ToString();
+                _yardContainer.LastFreeDay = string.IsNullOrEmpty(lfd) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(lfd);
 
                 _yardContainer.PaidThruDate = Convert.ToDateTime("1970-01-01 00:00:00");
                 _yardContainer.PlugOut = Convert.ToDateTime("1970-01-01 00:00:00");

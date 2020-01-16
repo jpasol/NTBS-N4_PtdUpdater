@@ -47,11 +47,17 @@ namespace Paid2Date
                         //if freeuntil != null then gatepass payment ; if null then it's manual invoiced
                         //return freeuntil(gatepass) or ldd+9(manual)
                         yardContainer.IsArrastrePaid = true;
-                        yardContainer.PaidThruDate =
-                                                        !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
-                                                        :
-                                                        yardContainer.Category == "IMPRT" ? Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //paid thru date = free until (ldd+9)
-                                                        : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);                                                  
+                        yardContainer.PaidThruDate = yardContainer.LastFreeDay;
+
+                        if (Convert.ToDateTime(yardContainer.LastFreeDay).Year < 2000) //no recorded lfd in N4
+                        {
+                            yardContainer.PaidThruDate =
+                                !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
+                                :
+                                yardContainer.Category == "IMPRT" ? Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //paid thru date = free until (ldd+9)
+                                : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);
+                        }
+                                                
                         //return plugin
                         yardContainer.PlugIn =
                                 !string.IsNullOrEmpty(plugin) ? Convert.ToDateTime(plugin) :
@@ -84,24 +90,24 @@ namespace Paid2Date
                         Convert.ToDateTime(yardContainer.PaidThruDate).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (ext.ChargeType.Contains("STOI"))).FirstOrDefault().Quantity)
+                                                                        && (ext.ChargeType.Contains("STOI"))).Sum(val => val.Quantity))
                         :
                         Convert.ToDateTime(yardContainer.TimeIn).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                         && (yardContainer.TimeIn <= ext.SystemDate)
-                                                        && (ext.ChargeType.Contains("STOEX"))).FirstOrDefault().Quantity);
+                                                        && (ext.ChargeType.Contains("STOEX"))).Sum(val => val.Quantity));
 
                     yardContainer.PlugOut =
                         yardContainer.Category == "IMPRT"?
                         Convert.ToDateTime(yardContainer.PlugOut).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
+                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
                         :
                         Convert.ToDateTime(yardContainer.PlugOut).
                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
+                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
                         ;
 
                     yardContainer.PlugOut =
@@ -109,12 +115,12 @@ namespace Paid2Date
                         Convert.ToDateTime(yardContainer.PlugOut).
                         AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
+                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
                         :
                         Convert.ToDateTime(yardContainer.PlugOut).
                         AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).FirstOrDefault().Quantity)
+                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
                         ;
                 }
                 catch { }
