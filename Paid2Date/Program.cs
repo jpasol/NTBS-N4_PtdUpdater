@@ -54,10 +54,11 @@ namespace Paid2Date
                             yardContainer.PaidThruDate =
                                 !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
                                 :
-                                yardContainer.Category == "IMPRT" ? Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //paid thru date = free until (ldd+9)
+                                yardContainer.Category == "IMPRT" && Convert.ToDateTime(yardContainer.LDD).Year > 2000 ?
+                                Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //paid thru date = free until (ldd+9)
                                 : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);
                         }
-                                                
+
                         //return plugin
                         yardContainer.PlugIn =
                                 !string.IsNullOrEmpty(plugin) ? Convert.ToDateTime(plugin) :
@@ -81,7 +82,7 @@ namespace Paid2Date
             //EXTEND using Paidthruday special services TIMEIN <= SYSDTTM
 
             #region EXTEND using Paidthruday special services TIMEIN <= SYSDTTM
-            foreach (Model.Yard_Container yardContainer in yard_Containers)
+            foreach (Model.Yard_Container yardContainer in yard_Containers.Where(ctn => ctn.IsArrastrePaid == true))
             {
                 try
                 {//try extending each container using the first recorded payment within specified conditions; using its quantity as added days 
