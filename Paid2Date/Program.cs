@@ -49,8 +49,13 @@ namespace Paid2Date
                         yardContainer.IsArrastrePaid = true;
                         yardContainer.PaidThruDate = yardContainer.LastFreeDay;
 
+                        
                         if (Convert.ToDateTime(yardContainer.LastFreeDay).Year < 2000) //no recorded lfd in N4
                         {
+                            yardContainer.LastFreeDay = yardContainer.Category == "IMPRT" && Convert.ToDateTime(yardContainer.LDD).Year > 2000 ?
+                                Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //free day = (ldd+9) or (t_in+9)
+                                : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);
+
                             yardContainer.PaidThruDate =
                                 !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
                                 :
@@ -144,7 +149,8 @@ namespace Paid2Date
                     Paid_Through_Date: Convert.ToDateTime(yardContainer.PaidThruDate),
                     Time_In: Convert.ToDateTime(yardContainer.TimeIn),
                     Plugout: Convert.ToDateTime(yardContainer.PlugOut),
-                    IsArrastrePaid: yardContainer.IsArrastrePaid);
+                    IsArrastrePaid: yardContainer.IsArrastrePaid,
+                    LastFreeDay : Convert.ToDateTime(yardContainer.LastFreeDay));
 
                 yardContainer.UpdateN4Unit();
             }

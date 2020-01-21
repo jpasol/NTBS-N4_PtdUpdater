@@ -31,6 +31,7 @@ namespace Paid2Date.Model
 
             string Storage = PaidThruDate.Value.Year > 2000 ? $@"'{PaidThruDate.ToString()}'" : "null";
             string Electricity = PlugOut.Value.Year > 2000 && PlugOut != TimeIn ? $@"'{PlugOut.ToString()}'" : "null";
+            Storage = PaidThruDate.Value.ToString("MM/dd/yyyy") == LastFreeDay.Value.ToString("MM/dd/yyyy") ? "null" : Storage;
 
             ADODB.Connection DEVN4Connection = new Connections().DEVN4Connection;
             //Connect

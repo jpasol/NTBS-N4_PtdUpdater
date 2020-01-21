@@ -291,6 +291,8 @@ namespace Paid2Date {
             
             private global::System.Data.DataColumn columnPlugout;
             
+            private global::System.Data.DataColumn columnLastFreeDay;
+            
             private global::System.Data.DataColumn columnTime_In;
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -376,6 +378,14 @@ namespace Paid2Date {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn LastFreeDayColumn {
+                get {
+                    return this.columnLastFreeDay;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public global::System.Data.DataColumn Time_InColumn {
                 get {
                     return this.columnTime_In;
@@ -419,7 +429,7 @@ namespace Paid2Date {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public Output_ReportRow AddOutput_ReportRow(string Container_Number, string Category, string Transit_State, bool IsArrastrePaid, System.DateTime Paid_Through_Date, System.DateTime Plugout, System.DateTime Time_In) {
+            public Output_ReportRow AddOutput_ReportRow(string Container_Number, string Category, string Transit_State, bool IsArrastrePaid, System.DateTime Paid_Through_Date, System.DateTime Plugout, System.DateTime LastFreeDay, System.DateTime Time_In) {
                 Output_ReportRow rowOutput_ReportRow = ((Output_ReportRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         Container_Number,
@@ -428,6 +438,7 @@ namespace Paid2Date {
                         IsArrastrePaid,
                         Paid_Through_Date,
                         Plugout,
+                        LastFreeDay,
                         Time_In};
                 rowOutput_ReportRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowOutput_ReportRow);
@@ -457,6 +468,7 @@ namespace Paid2Date {
                 this.columnIsArrastrePaid = base.Columns["IsArrastrePaid"];
                 this.columnPaid_Through_Date = base.Columns["Paid Through Date"];
                 this.columnPlugout = base.Columns["Plugout"];
+                this.columnLastFreeDay = base.Columns["LastFreeDay"];
                 this.columnTime_In = base.Columns["Time In"];
             }
             
@@ -475,6 +487,8 @@ namespace Paid2Date {
                 base.Columns.Add(this.columnPaid_Through_Date);
                 this.columnPlugout = new global::System.Data.DataColumn("Plugout", typeof(global::System.DateTime), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnPlugout);
+                this.columnLastFreeDay = new global::System.Data.DataColumn("LastFreeDay", typeof(global::System.DateTime), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnLastFreeDay);
                 this.columnTime_In = new global::System.Data.DataColumn("Time In", typeof(global::System.DateTime), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnTime_In);
             }
@@ -715,6 +729,22 @@ namespace Paid2Date {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public System.DateTime LastFreeDay {
+                get {
+                    try {
+                        return ((global::System.DateTime)(this[this.tableOutput_Report.LastFreeDayColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'LastFreeDay\' in table \'Output Report\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableOutput_Report.LastFreeDayColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public System.DateTime Time_In {
                 get {
                     try {
@@ -799,6 +829,18 @@ namespace Paid2Date {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public void SetPlugoutNull() {
                 this[this.tableOutput_Report.PlugoutColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsLastFreeDayNull() {
+                return this.IsNull(this.tableOutput_Report.LastFreeDayColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetLastFreeDayNull() {
+                this[this.tableOutput_Report.LastFreeDayColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
