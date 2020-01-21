@@ -43,6 +43,7 @@ namespace Paid2Date.Model
 UPDATE [apex].[dbo].[inv_unit_fcy_visit]
    SET [flex_date01] = {Storage}
 	    ,[flex_date02] = {Electricity}
+        ,[flex_date03] = {Storage}
  WHERE unit_gkey = {Gkey}
 ";
             updateCommand.Execute(out object dsad, 0, 0);
