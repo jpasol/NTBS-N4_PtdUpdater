@@ -72,7 +72,7 @@ SELECT [refnum]
       ,[outdttm]
       ,[IsN4ReeferPaymentUpdated]
       ,[CompanyCode]
-  FROM [billing].[dbo].[CCRdtl] where status <> 'CAN' and chargetyp like '%MCRFC%' or chargetyp like '%STOI%' or chargetyp like '%STOEX%'
+  FROM [billing].[dbo].[CCRdtl] where status <> 'CAN' and (chargetyp like '%MCRFC%' or chargetyp like '%STOI%' or chargetyp like '%STOE%')
 ";
             System.Data.DataTable _EXTContainersTable = new System.Data.DataTable();
             System.Data.OleDb.OleDbDataAdapter adapter = new System.Data.OleDb.OleDbDataAdapter();
@@ -95,13 +95,13 @@ SELECT [refnum]
             foreach (DataRow dr in RetrivedExtContainers.Rows)
             {
                 Extended_Container _extContainer = new Extended_Container();
-                _extContainer.ContainerNumber = dr["cntnum"].ToString();
-                _extContainer.Remarks = dr["remark"].ToString();
-                int.TryParse(dr["docrefno"].ToString(), out _extContainer.DocReference);
-                int.TryParse(dr["quantity"].ToString(), out _extContainer.Quantity);
-                _extContainer.ChargeType = dr["chargetyp"].ToString();
+                _extContainer.ContainerNumber = dr["cntnum"].ToString().Trim();
+                _extContainer.Remarks = dr["remark"].ToString().Trim();
+                _extContainer.DocReference = Convert.ToInt32(Double.Parse(dr["docrefno"].ToString().Trim()));
+                _extContainer.Quantity = Convert.ToInt32(Double.Parse(dr["quantity"].ToString()));
+                _extContainer.ChargeType = dr["chargetyp"].ToString().Trim();
                 string date = dr["sysdttm"].ToString();
-                _extContainer.SystemDate = string.IsNullOrEmpty(date) ? (DateTime?)null : DateTime.Parse(date);
+                _extContainer.SystemDate = string.IsNullOrEmpty(date) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(date);
 
                 _generated.Add(_extContainer);
             }

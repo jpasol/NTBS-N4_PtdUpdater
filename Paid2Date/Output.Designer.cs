@@ -295,6 +295,10 @@ namespace Paid2Date {
             
             private global::System.Data.DataColumn columnTime_In;
             
+            private global::System.Data.DataColumn columnLastDischargeDate;
+            
+            private global::System.Data.DataColumn columnisReefer;
+            
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public Output_ReportDataTable() {
@@ -394,6 +398,22 @@ namespace Paid2Date {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn LastDischargeDateColumn {
+                get {
+                    return this.columnLastDischargeDate;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn isReeferColumn {
+                get {
+                    return this.columnisReefer;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             [global::System.ComponentModel.Browsable(false)]
             public int Count {
                 get {
@@ -429,7 +449,7 @@ namespace Paid2Date {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public Output_ReportRow AddOutput_ReportRow(string Container_Number, string Category, string Transit_State, bool IsArrastrePaid, System.DateTime Paid_Through_Date, System.DateTime Plugout, System.DateTime LastFreeDay, System.DateTime Time_In) {
+            public Output_ReportRow AddOutput_ReportRow(string Container_Number, string Category, string Transit_State, bool IsArrastrePaid, System.DateTime Paid_Through_Date, System.DateTime Plugout, System.DateTime LastFreeDay, System.DateTime Time_In, System.DateTime LastDischargeDate, bool isReefer) {
                 Output_ReportRow rowOutput_ReportRow = ((Output_ReportRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         Container_Number,
@@ -439,7 +459,9 @@ namespace Paid2Date {
                         Paid_Through_Date,
                         Plugout,
                         LastFreeDay,
-                        Time_In};
+                        Time_In,
+                        LastDischargeDate,
+                        isReefer};
                 rowOutput_ReportRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowOutput_ReportRow);
                 return rowOutput_ReportRow;
@@ -470,6 +492,8 @@ namespace Paid2Date {
                 this.columnPlugout = base.Columns["Plugout"];
                 this.columnLastFreeDay = base.Columns["LastFreeDay"];
                 this.columnTime_In = base.Columns["Time In"];
+                this.columnLastDischargeDate = base.Columns["LastDischargeDate"];
+                this.columnisReefer = base.Columns["isReefer"];
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -491,6 +515,10 @@ namespace Paid2Date {
                 base.Columns.Add(this.columnLastFreeDay);
                 this.columnTime_In = new global::System.Data.DataColumn("Time In", typeof(global::System.DateTime), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnTime_In);
+                this.columnLastDischargeDate = new global::System.Data.DataColumn("LastDischargeDate", typeof(global::System.DateTime), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnLastDischargeDate);
+                this.columnisReefer = new global::System.Data.DataColumn("isReefer", typeof(bool), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnisReefer);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -761,6 +789,38 @@ namespace Paid2Date {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public System.DateTime LastDischargeDate {
+                get {
+                    try {
+                        return ((global::System.DateTime)(this[this.tableOutput_Report.LastDischargeDateColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'LastDischargeDate\' in table \'Output Report\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableOutput_Report.LastDischargeDateColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool isReefer {
+                get {
+                    try {
+                        return ((bool)(this[this.tableOutput_Report.isReeferColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'isReefer\' in table \'Output Report\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableOutput_Report.isReeferColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public bool IsContainer_NumberNull() {
                 return this.IsNull(this.tableOutput_Report.Container_NumberColumn);
             }
@@ -853,6 +913,30 @@ namespace Paid2Date {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public void SetTime_InNull() {
                 this[this.tableOutput_Report.Time_InColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsLastDischargeDateNull() {
+                return this.IsNull(this.tableOutput_Report.LastDischargeDateColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetLastDischargeDateNull() {
+                this[this.tableOutput_Report.LastDischargeDateColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsisReeferNull() {
+                return this.IsNull(this.tableOutput_Report.isReeferColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetisReeferNull() {
+                this[this.tableOutput_Report.isReeferColumn] = global::System.Convert.DBNull;
             }
         }
         

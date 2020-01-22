@@ -17,9 +17,11 @@ namespace Paid2Date.Model
         public string BillofLading;
         public string CCRNumber;
         public string Remarks;
+        public string Category;
         public int StorageQty;
         public DateTime CROValidity;
         public DateTime? FreeUntil = null;
+        public DateTime? LastDischargeDate = null;
         public DateTime? PlugIn = null;
         public DateTime? PlugOut = null;
         public DateTime? StorageBegin = null;
@@ -115,7 +117,7 @@ SELECT [refnum]
       ,[outdttm]
       ,[IsN4ReeferPaymentUpdated]
       ,[CompanyCode]
-  FROM [billing].[dbo].[CCRdtl] where chargetyp like '%CBIMP%' or chargetyp like '%CBEXP%' and status <> 'CAN'
+  FROM [billing].[dbo].[CCRdtl] where (chargetyp like '%CBIMP%' or chargetyp like '%CBEXP%') and status <> 'CAN'
 ";
             #endregion
 
@@ -202,11 +204,12 @@ SELECT [refnum]
             {
 
                 Paid_Container _paidContainer = new Paid_Container();
-                _paidContainer.ContainerNumber = dr["cntnum"].ToString();
-                _paidContainer.GatepassNumber = dr["gpsnum"].ToString();
-                _paidContainer.Registry = dr["regnum"].ToString();
-                _paidContainer.CompanyCode = dr["CompanyCode"].ToString();
-                _paidContainer.BillofLading = dr["bilnum"].ToString();
+                _paidContainer.ContainerNumber = dr["cntnum"].ToString().Trim();
+                _paidContainer.GatepassNumber = dr["gpsnum"].ToString().Trim();
+                _paidContainer.Registry = dr["regnum"].ToString().Trim();
+                _paidContainer.CompanyCode = dr["CompanyCode"].ToString().Trim();
+                _paidContainer.BillofLading = dr["bilnum"].ToString().Trim();
+                _paidContainer.Category = "IMPRT";
 
                 string _free = dr["freeuntil"].ToString();
                 string _stobeg = dr["stobeg"].ToString();
@@ -215,7 +218,7 @@ SELECT [refnum]
                 string _crodte = dr["crodte"].ToString();
                 string _plugin = dr["plugin"].ToString();
                 string _plugou = dr["plugou"].ToString();
-
+                string _lstdsc = dr["lstdch"].ToString();
 
                 _paidContainer.FreeUntil = string.IsNullOrEmpty(_free) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_free);
                 _paidContainer.StorageBegin = string.IsNullOrEmpty(_stobeg) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_stobeg);
@@ -224,6 +227,7 @@ SELECT [refnum]
                 _paidContainer.CROValidity = string.IsNullOrEmpty(_crodte) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_crodte);
                 _paidContainer.PlugIn = string.IsNullOrEmpty(_plugin) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_plugin);
                 _paidContainer.PlugOut = string.IsNullOrEmpty(_plugou) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_plugou);
+                _paidContainer.LastDischargeDate = string.IsNullOrEmpty(_lstdsc) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_lstdsc);
                 _generated.Add(_paidContainer);
 
             }
@@ -233,10 +237,12 @@ SELECT [refnum]
             {
 
                 Paid_Container _paidContainer = new Paid_Container();
-                _paidContainer.ContainerNumber = dr["cntnum"].ToString();
-                _paidContainer.CCRNumber = dr["ccrnum"].ToString();
-                _paidContainer.Remarks = dr["remark"].ToString();
-                int.TryParse(dr["quantity"].ToString(),out _paidContainer.StorageQty);
+                _paidContainer.ContainerNumber = dr["cntnum"].ToString().Trim();
+                _paidContainer.CCRNumber = dr["ccrnum"].ToString().Trim();
+                _paidContainer.Remarks = dr["remark"].ToString().Trim();
+                _paidContainer.Category = dr["chargetyp"].ToString().Trim().Contains("CBIMP") ? "IMPRT" : "EXPRT";
+
+                int.TryParse(dr["quantity"].ToString().Trim(), out _paidContainer.StorageQty);
 
                 string _sysdttm = dr["sysdttm"].ToString();
                 _paidContainer.SystemDate = string.IsNullOrEmpty(_sysdttm) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_sysdttm);
@@ -252,8 +258,9 @@ SELECT [refnum]
             {
 
                 Paid_Container _paidContainer = new Paid_Container();
-                _paidContainer.ContainerNumber = dr["cntnum"].ToString();
-                _paidContainer.CCRNumber = dr["ccrnum"].ToString();
+                _paidContainer.ContainerNumber = dr["cntnum"].ToString().Trim();
+                _paidContainer.CCRNumber = dr["ccrnum"].ToString().Trim();
+                _paidContainer.Category = "EXPRT";
 
                 string _sysdttm = dr["sysdttm"].ToString();
                 _paidContainer.SystemDate = string.IsNullOrEmpty(_sysdttm) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(_sysdttm);

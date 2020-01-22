@@ -17,6 +17,7 @@ namespace Paid2Date.Model
         public string TransitState;
         public string BillofLading;
         public Boolean IsArrastrePaid;
+        public Boolean IsReefer;
         public DateTime? PlugIn;
         public DateTime? PlugOut;
         public DateTime? PaidThruDate;
@@ -28,28 +29,34 @@ namespace Paid2Date.Model
 
         public void UpdateN4Unit()
         {
+                string Storage = PaidThruDate.Value.Year > 2000 ? $@"'{PaidThruDate.ToString()}'" : "null";
+                string Electricity = PlugOut.Value.Year > 2000  ? $@"'{PlugOut.ToString()}'" : "null";
+                string arrastrePayment = IsArrastrePaid ? $@"'{DateTime.Now.ToString()}'" : "null";
+                //Storage = PaidThruDate.Value.Year == LastFreeDay.Value.Year &&
+                //            PaidThruDate.Value.Month == LastFreeDay.Value.Month &&
+                //            PaidThruDate.Value.Day == LastFreeDay.Value.Day ? "null" : Storage;
+             
+                //PaidThruDate = Storage == "null" ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.ParseExact(Storage.Replace("'",""), "M/d/yyyy h:mm:ss tt", null); //update values
+                //PlugOut = Electricity == "null" ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.ParseExact(Electricity.Replace("'", ""), "M/d/yyyy h:mm:ss tt", null); //update values
+                //LastFreeDay = arrastrePayment == "null" ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.ParseExact(arrastrePayment.Replace("'", ""), "M/d/yyyy h:mm:ss tt", null); //update values
 
-            string Storage = PaidThruDate.Value.Year > 2000 ? $@"'{PaidThruDate.ToString()}'" : "null";
-            string Electricity = PlugOut.Value.Year > 2000 && PlugOut != TimeIn ? $@"'{PlugOut.ToString()}'" : "null";
-            Storage = PaidThruDate.Value.ToString("MM/dd/yyyy") == LastFreeDay.Value.ToString("MM/dd/yyyy") ? "null" : Storage;
 
             ADODB.Connection DEVN4Connection = new Connections().DEVN4Connection;
-            //Connect
-            DEVN4Connection.Open();
+                //Connect
+                DEVN4Connection.Open();
 
-            //Update
-            ADODB.Command updateCommand = new ADODB.Command();
-            updateCommand.ActiveConnection = DEVN4Connection;
-            updateCommand.CommandText = $@"
+                //Update
+                ADODB.Command updateCommand = new ADODB.Command();
+                updateCommand.ActiveConnection = DEVN4Connection;
+                updateCommand.CommandText = $@"
 UPDATE [apex].[dbo].[inv_unit_fcy_visit]
    SET [flex_date01] = {Storage}
 	    ,[flex_date02] = {Electricity}
-        ,[flex_date03] = {Storage}
+        ,[flex_date03] = {arrastrePayment}
  WHERE unit_gkey = {Gkey}
 ";
-            updateCommand.Execute(out object dsad, 0, 0);
-            DEVN4Connection.Close();
-
+                updateCommand.Execute(out object dsad, 0, 0);
+                DEVN4Connection.Close();
         }
 
 
@@ -72,11 +79,13 @@ SELECT iu.id 'Container Number'
 ,time_discharge_complete
 ,iu.gkey
 ,last_free_day
+,requires_power
+,ata
 
 FROM [apex].[dbo].inv_unit iu 
 inner join inv_unit_fcy_visit iufv on iufv.unit_gkey = iu.gkey
 left join argo_carrier_visit acv on iufv.actual_ib_cv = acv.gkey
-left join argo_visit_details avd on acv.gkey = avd.gkey
+left join argo_visit_details avd on acv.cvcvd_gkey = avd.gkey
 
 where transit_state like '%YARD%'
 ";
@@ -101,19 +110,24 @@ where transit_state like '%YARD%'
             foreach (DataRow dr in RetrivedYardContainers.Rows)
             {
                 Yard_Container _yardContainer = new Yard_Container();
-                _yardContainer.ContainerNumber = dr["Container Number"].ToString();
-                _yardContainer.Category = dr["Category"].ToString();
-                _yardContainer.FreightKind = dr["Freight Kind"].ToString();
-                _yardContainer.TransitState = dr["Transit State"].ToString();
-                _yardContainer.Gkey = Convert.ToInt32(dr["Gkey"].ToString());
-                string ldd = dr["time_discharge_complete"].ToString();
+                _yardContainer.ContainerNumber = dr["Container Number"].ToString().Trim();
+                _yardContainer.Category = dr["Category"].ToString().Trim();
+                _yardContainer.FreightKind = dr["Freight Kind"].ToString().Trim();
+                _yardContainer.TransitState = dr["Transit State"].ToString().Trim();
+                _yardContainer.Gkey = Convert.ToInt32(dr["Gkey"].ToString().Trim());
+                _yardContainer.IsReefer = Convert.ToBoolean(dr["requires_power"].ToString().Trim());
+
+                string ldd = dr["time_discharge_complete"].ToString().Trim();
                 _yardContainer.LDD = string.IsNullOrEmpty(ldd) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(ldd);
 
-                string date = dr["time_in"].ToString();
+                string date = dr["time_in"].ToString().Trim();
                 _yardContainer.TimeIn = string.IsNullOrEmpty(date) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(date);
 
-                string lfd = dr["last_free_day"].ToString();
+                string lfd = dr["last_free_day"].ToString().Trim();
                 _yardContainer.LastFreeDay = string.IsNullOrEmpty(lfd) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(lfd);
+
+                string ata = dr["ata"].ToString().Trim();
+                _yardContainer.ATA = string.IsNullOrEmpty(ata) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(ata);
 
                 _yardContainer.PaidThruDate = Convert.ToDateTime("1970-01-01 00:00:00");
                 _yardContainer.PlugOut = Convert.ToDateTime("1970-01-01 00:00:00");

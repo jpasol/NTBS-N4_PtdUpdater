@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using ClosedXML;
+using System.Threading;
+using System.Threading.Tasks;
 namespace Paid2Date
 {
     class Program
@@ -19,118 +21,128 @@ namespace Paid2Date
 
             //update Paidthruday of each yardcontainer using paid containers
             #region update Paidthruday of each yardcontainer using paid containers
-            foreach (Model.Yard_Container yardContainer in yard_Containers)
-            {
-                try
-                {
-                    int payment = 0;
-                    string paidthruDate = null;
-                    string plugin = null;
-                    string plugout = null;
-                    try
-                    {//try to get number of recorded payment, and recorded freeuntil
-                        IEnumerable<Model.Paid_Container> list = paid_Containers.Where(paid => (yardContainer.ContainerNumber.Trim() == paid.ContainerNumber.Trim())
-                                                     && (
-                                                     (yardContainer.ATA <= paid.SystemDate)
-                                                     || (yardContainer.TimeIn <= paid.SystemDate)));
-                        payment = list.Count();
-                        paidthruDate = list.FirstOrDefault().StorageEnd.ToString();
-                        plugin = list.FirstOrDefault().PlugIn.ToString();
-                        plugout = list.FirstOrDefault().PlugOut.ToString();
+            Parallel.ForEach(yard_Containers, (yardContainer) =>
+             {
+                 try
+                 {
+                     int payment = 0;
+                     string paidthruDate = null;
+                     string plugin = null;
+                     string plugout = null;
+                     try
+                     {//try to get number of recorded payment, and recorded freeuntil
+                         IEnumerable<Model.Paid_Container> list = paid_Containers.Where(paid => (yardContainer.ContainerNumber.Trim() == paid.ContainerNumber.Trim())
+                                                       && yardContainer.Category == paid.Category && 
+                                                       (
+                                                       (yardContainer.Category.StartsWith("IMPRT") && yardContainer.ATA <= paid.SystemDate)
+                                                       || (yardContainer.Category.StartsWith("EXPRT") &&  yardContainer.TimeIn <= paid.SystemDate)));
+                         payment = list.Count();
+                         paidthruDate = list.FirstOrDefault().StorageEnd.ToString();
+                         plugin = list.FirstOrDefault().PlugIn.ToString();
+                         plugout = list.FirstOrDefault().PlugOut.ToString();
+                         
+                         if(payment > 0)
+                         {
+                             if (yardContainer.LastFreeDay.Value.Year < 2000) yardContainer.LastFreeDay = list.FirstOrDefault().FreeUntil; //get LFD from GPS if none
+                             yardContainer.IsArrastrePaid = true; //arrastre paid
+                         }
+                         
 
-                    }
-                    catch { }
+                     }
+                     catch { }
 
-                    if (payment > 0)                  //paid
-                    {
+                         //if freeuntil != null then gatepass payment ; if null then it's manual invoiced
+                         //return freeuntil(gatepass) or ldd+9(manual) 
+                         //yardContainer.PaidThruDate = yardContainer.LastFreeDay;
 
-                        //if freeuntil != null then gatepass payment ; if null then it's manual invoiced
-                        //return freeuntil(gatepass) or ldd+9(manual)
-                        yardContainer.IsArrastrePaid = true;
-                        yardContainer.PaidThruDate = yardContainer.LastFreeDay;
+                         if (Convert.ToDateTime(yardContainer.LastFreeDay).Year < 2000) //no recorded lfd in N4
+                         {
+                             yardContainer.LastFreeDay = yardContainer.Category == "IMPRT" && Convert.ToDateTime(yardContainer.LDD).Year > 2000 ?
+                                 Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //free day = (ldd+9) iMPORT
+                                 : yardContainer.Category == "EXPRT"? Convert.ToDateTime(yardContainer.TimeIn).AddDays(9) //EXPORT T_IN+9
+/*                                 : yardContainer.Category == "STRGE"? Convert.ToDateTime(yardContainer.TimeIn).AddDays(4)*/ //STRGE T_IN+4
+                                 : Convert.ToDateTime("1970-01-01 00:00:00");
 
-                        
-                        if (Convert.ToDateTime(yardContainer.LastFreeDay).Year < 2000) //no recorded lfd in N4
-                        {
-                            yardContainer.LastFreeDay = yardContainer.Category == "IMPRT" && Convert.ToDateTime(yardContainer.LDD).Year > 2000 ?
-                                Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //free day = (ldd+9) or (t_in+9)
-                                : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);
+                             //yardContainer.PaidThruDate =
+                             //    !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
+                             //    :
+                             //    yardContainer.LastFreeDay;
+                         }
 
-                            yardContainer.PaidThruDate =
-                                !string.IsNullOrEmpty(paidthruDate) ? Convert.ToDateTime(paidthruDate)
-                                :
-                                yardContainer.Category == "IMPRT" && Convert.ToDateTime(yardContainer.LDD).Year > 2000 ?
-                                Convert.ToDateTime(yardContainer.LDD).AddDays(9)  //paid thru date = free until (ldd+9)
-                                : Convert.ToDateTime(yardContainer.TimeIn).AddDays(9);
-                        }
+                         //return plugin
+                         yardContainer.PlugIn =
+                              !string.IsNullOrEmpty(plugin) ? Convert.ToDateTime(plugin) : //IMPRT
+                              yardContainer.TimeIn; //assuming timein = plugin
 
-                        //return plugin
-                        yardContainer.PlugIn =
-                                !string.IsNullOrEmpty(plugin) ? Convert.ToDateTime(plugin) :
-                                yardContainer.Category == "IMPRT" ? Convert.ToDateTime("1970-01-01 00:00:00")
-                                : yardContainer.TimeIn;
+                         //return plugout
+                         yardContainer.PlugOut =
+                                  !string.IsNullOrEmpty(plugout) ? Convert.ToDateTime(plugout) : //IMPRT
+                              Convert.ToDateTime("1970-01-01 00:00:00");
 
-                        //return plugout
-                        yardContainer.PlugOut =
-                                !string.IsNullOrEmpty(plugout) ? Convert.ToDateTime(plugout) :
-                                yardContainer.Category == "IMPRT" ? Convert.ToDateTime("1970-01-01 00:00:00")
-                                : yardContainer.TimeIn;
-                    }
 
-                }
-                catch { }
+                 }
+                 catch { }
 
-            }
+             });
             #endregion
 
 
-            //EXTEND using Paidthruday special services TIMEIN <= SYSDTTM
+            //EXTEND using Paidthruday manual invoice TIMEIN <= SYSDTTM
 
             #region EXTEND using Paidthruday special services TIMEIN <= SYSDTTM
-            foreach (Model.Yard_Container yardContainer in yard_Containers.Where(ctn => ctn.IsArrastrePaid == true))
-            {
-                try
-                {//try extending each container using the first recorded payment within specified conditions; using its quantity as added days 
-                    yardContainer.PaidThruDate =
-                        yardContainer.Category == "IMPRT" ?
-                        Convert.ToDateTime(yardContainer.PaidThruDate).
-                        AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                        && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (ext.ChargeType.Contains("STOI"))).Sum(val => val.Quantity))
-                        :
-                        Convert.ToDateTime(yardContainer.TimeIn).
-                        AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                        && (yardContainer.TimeIn <= ext.SystemDate)
-                                                        && (ext.ChargeType.Contains("STOEX"))).Sum(val => val.Quantity));
+            Parallel.ForEach(yard_Containers, (yardContainer) =>
+             {
+                 try
+                 {//try extending each container using the first recorded payment within specified conditions; using its quantity as added days 
+                                         
+                     yardContainer.PaidThruDate =
+                          yardContainer.Category.StartsWith("IMPRT") ?
+                          Convert.ToDateTime(yardContainer.LastFreeDay).
+                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                          && (yardContainer.ATA <= ext.SystemDate)
+                                                                          && (ext.ChargeType.StartsWith("STOI"))).Sum(val => val.Quantity))
+                          : yardContainer.Category.StartsWith("EXPRT") ?
+                          Convert.ToDateTime(yardContainer.TimeIn).
+                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                          && (yardContainer.TimeIn <= ext.SystemDate)
+                                                          && (ext.ChargeType.StartsWith("STOE"))).Sum(val => val.Quantity))
+                         : Convert.ToDateTime("1970-01-01 00:00:00");
 
-                    yardContainer.PlugOut =
-                        yardContainer.Category == "IMPRT"?
-                        Convert.ToDateTime(yardContainer.PlugOut).
-                        AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                        && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
-                        :
-                        Convert.ToDateTime(yardContainer.PlugOut).
-                        AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                        && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                        && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
-                        ;
+                     yardContainer.PlugOut =
+                         yardContainer.Category.StartsWith("IMPRT") ?
+                         Convert.ToDateTime(yardContainer.PlugIn).
+                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                         && (yardContainer.ATA <= ext.SystemDate)
+                                                                         && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                         : yardContainer.Category.StartsWith("EXPRT") ?
+                         Convert.ToDateTime(yardContainer.TimeIn).
+                         AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
+                                                                         && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                         : Convert.ToDateTime("1970-01-01 00:00:00");
 
-                    yardContainer.PlugOut =
-                        yardContainer.Category == "IMPRT" ?
-                        Convert.ToDateTime(yardContainer.PlugOut).
-                        AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                        && (yardContainer.ATA <= ext.SystemDate)
-                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
-                        :
-                        Convert.ToDateTime(yardContainer.PlugOut).
-                        AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                        && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                        && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
-                        ;
-                }
-                catch { }
-            }
+                     yardContainer.PlugOut =
+                         yardContainer.Category.StartsWith("IMPRT") ?
+                         Convert.ToDateTime(yardContainer.PlugIn).
+                         AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                         && (yardContainer.ATA <= ext.SystemDate)
+                                                                         && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                         : yardContainer.Category.StartsWith("EXPRT") ?
+                         Convert.ToDateTime(yardContainer.TimeIn).
+                         AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
+                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
+                                                                         && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                         : Convert.ToDateTime("1970-01-01 00:00:00");
+
+                     //remove if not extended
+                     if (yardContainer.PaidThruDate == yardContainer.LastFreeDay) yardContainer.PaidThruDate = Convert.ToDateTime("1970-01-01 00:00:00");
+                     if (yardContainer.PaidThruDate == yardContainer.TimeIn) yardContainer.PaidThruDate = Convert.ToDateTime("1970-01-01 00:00:00");
+                     if (yardContainer.PlugOut == yardContainer.TimeIn) yardContainer.PlugOut = Convert.ToDateTime("1970-01-01 00:00:00");
+
+                 }
+                 catch { }
+                 
+             });
             #endregion
 
             //EXTEND using Paidthruday special services blnum remark
@@ -150,7 +162,10 @@ namespace Paid2Date
                     Time_In: Convert.ToDateTime(yardContainer.TimeIn),
                     Plugout: Convert.ToDateTime(yardContainer.PlugOut),
                     IsArrastrePaid: yardContainer.IsArrastrePaid,
-                    LastFreeDay : Convert.ToDateTime(yardContainer.LastFreeDay));
+                    LastFreeDay : Convert.ToDateTime(yardContainer.LastFreeDay),
+                    LastDischargeDate : Convert.ToDateTime(yardContainer.LDD),
+                    isReefer: yardContainer.IsReefer);
+                    
 
                 yardContainer.UpdateN4Unit();
             }
