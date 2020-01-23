@@ -71,13 +71,16 @@ namespace Paid2Date
 
                          //return plugin
                          yardContainer.PlugIn =
-                              !string.IsNullOrEmpty(plugin) ? Convert.ToDateTime(plugin) : //IMPRT
+                                yardContainer.Category == "IMPRT" && !string.IsNullOrEmpty(plugin) ? 
+                                Convert.ToDateTime(plugin) : //IMPRT
                               yardContainer.TimeIn; //assuming timein = plugin
 
+                        
                          //return plugout
                          yardContainer.PlugOut =
-                                  !string.IsNullOrEmpty(plugout) ? Convert.ToDateTime(plugout) : //IMPRT
-                              Convert.ToDateTime("1970-01-01 00:00:00");
+                                  yardContainer.Category == "IMPRT" && !string.IsNullOrEmpty(plugout) ? 
+                                  Convert.ToDateTime(plugout) : //IMPRT
+                                    yardContainer.PlugIn;
 
 
                  }
@@ -110,7 +113,7 @@ namespace Paid2Date
 
                      yardContainer.PlugOut =
                          yardContainer.Category.StartsWith("IMPRT") ?
-                         Convert.ToDateTime(yardContainer.PlugIn).
+                         Convert.ToDateTime(yardContainer.PlugOut).
                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.ATA <= ext.SystemDate)
                                                                          && (ext.ChargeType.StartsWith("MCRFC1") ||
@@ -118,7 +121,7 @@ namespace Paid2Date
                                                                          ext.ChargeType.StartsWith("MCRFC4") ||
                                                                          ext.ChargeType.StartsWith("MCRFC5"))).Sum(val => val.Quantity)) 
                          : yardContainer.Category.StartsWith("EXPRT") ?
-                         Convert.ToDateTime(yardContainer.TimeIn).
+                         Convert.ToDateTime(yardContainer.PlugOut).
                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.TimeIn <= ext.SystemDate)
                                                                          && (ext.ChargeType.StartsWith("MCRFC1") ||
@@ -129,13 +132,13 @@ namespace Paid2Date
 
                      yardContainer.PlugOut =
                          yardContainer.Category.StartsWith("IMPRT") ?
-                         Convert.ToDateTime(yardContainer.PlugIn).
+                         Convert.ToDateTime(yardContainer.PlugOut).
                          AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.ATA <= ext.SystemDate)
                                                                          && (ext.ChargeType.StartsWith("MCRFC2") ||
                                                                          ext.ChargeType.StartsWith("MCRFC3"))).Sum(val => val.Quantity)) 
                          : yardContainer.Category.StartsWith("EXPRT") ?
-                         Convert.ToDateTime(yardContainer.TimeIn).
+                         Convert.ToDateTime(yardContainer.PlugOut).
                          AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.TimeIn <= ext.SystemDate)
                                                                          && (ext.ChargeType.StartsWith("MCRFC2") ||
@@ -172,7 +175,8 @@ namespace Paid2Date
                     IsArrastrePaid: yardContainer.IsArrastrePaid,
                     LastFreeDay : Convert.ToDateTime(yardContainer.LastFreeDay),
                     LastDischargeDate : Convert.ToDateTime(yardContainer.LDD),
-                    isReefer: yardContainer.IsReefer);
+                    isReefer: yardContainer.IsReefer,
+                    Plugin: Convert.ToDateTime(yardContainer.PlugIn));
                     
 
                 yardContainer.UpdateN4Unit();
