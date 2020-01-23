@@ -113,12 +113,18 @@ namespace Paid2Date
                          Convert.ToDateTime(yardContainer.PlugIn).
                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.ATA <= ext.SystemDate)
-                                                                         && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                                                                         && (ext.ChargeType.StartsWith("MCRFC1") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC6") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC4") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC5"))).Sum(val => val.Quantity)) 
                          : yardContainer.Category.StartsWith("EXPRT") ?
                          Convert.ToDateTime(yardContainer.TimeIn).
                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                         && (("MCRFC1,MCRFC6").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                                                                         && (ext.ChargeType.StartsWith("MCRFC1") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC6") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC4") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC5") )).Sum(val => val.Quantity)) 
                          : Convert.ToDateTime("1970-01-01 00:00:00");
 
                      yardContainer.PlugOut =
@@ -126,12 +132,14 @@ namespace Paid2Date
                          Convert.ToDateTime(yardContainer.PlugIn).
                          AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.ATA <= ext.SystemDate)
-                                                                         && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                                                                         && (ext.ChargeType.StartsWith("MCRFC2") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC3"))).Sum(val => val.Quantity)) 
                          : yardContainer.Category.StartsWith("EXPRT") ?
                          Convert.ToDateTime(yardContainer.TimeIn).
                          AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
                                                                          && (yardContainer.TimeIn <= ext.SystemDate)
-                                                                         && (("MCRFC2,MCRFC3").Contains(ext.ChargeType))).Sum(val => val.Quantity))
+                                                                         && (ext.ChargeType.StartsWith("MCRFC2") ||
+                                                                         ext.ChargeType.StartsWith("MCRFC3"))).Sum(val => val.Quantity)) 
                          : Convert.ToDateTime("1970-01-01 00:00:00");
 
                      //remove if not extended
