@@ -123,8 +123,7 @@ where transit_state like '%YARD%'
                 string date = dr["time_in"].ToString().Trim();
                 _yardContainer.TimeIn = string.IsNullOrEmpty(date) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(date);
 
-                string lfd = dr["last_free_day"].ToString().Trim();
-                _yardContainer.LastFreeDay = string.IsNullOrEmpty(lfd) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(lfd);
+                _yardContainer.LastFreeDay = _yardContainer.LDD.Value.Year < 2000 ? Convert.ToDateTime("1970-01-01 00:00:00") : _yardContainer.LDD.Value.AddDays(9);
 
                 string ata = dr["ata"].ToString().Trim();
                 _yardContainer.ATA = string.IsNullOrEmpty(ata) ? Convert.ToDateTime("1970-01-01 00:00:00") : DateTime.Parse(ata);
