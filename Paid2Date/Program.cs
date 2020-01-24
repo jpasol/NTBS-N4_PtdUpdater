@@ -97,17 +97,20 @@ namespace Paid2Date
              {
                  try
                  {//try extending each container using the first recorded payment within specified conditions; using its quantity as added days 
-                                         
+                     DateTime ten_d_before_time_in = Convert.ToDateTime(yardContainer.ATA).AddDays(-10); //10 days before ATA
+                     
+
                      yardContainer.PaidThruDate =
                           yardContainer.Category.StartsWith("IMPRT") ?
                           Convert.ToDateTime(yardContainer.LastFreeDay).
                           AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                          && (yardContainer.ATA <= ext.SystemDate)
+                                                                          && (yardContainer.ATA <= ext.SystemDate) 
                                                                           && (ext.ChargeType.StartsWith("STOI"))).Sum(val => val.Quantity))
                           : yardContainer.Category.StartsWith("EXPRT") ?
                           Convert.ToDateTime(yardContainer.TimeIn).
                           AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                          && (yardContainer.TimeIn <= ext.SystemDate)
+                                                          && ((ten_d_before_time_in <= ext.SystemDate) || 
+                                                                (yardContainer.TimeIn <= ext.SystemDate))
                                                           && (ext.ChargeType.StartsWith("STOE"))).Sum(val => val.Quantity))
                          : Convert.ToDateTime("1970-01-01 00:00:00");
 
@@ -123,7 +126,8 @@ namespace Paid2Date
                          : yardContainer.Category.StartsWith("EXPRT") ?
                          Convert.ToDateTime(yardContainer.PlugOut).
                          AddDays(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
+                                                                        && ((ten_d_before_time_in <= ext.SystemDate) ||
+                                                                            (yardContainer.TimeIn <= ext.SystemDate))
                                                                          && (ext.ChargeType.StartsWith("MCRFC1") ||
                                                                          ext.ChargeType.StartsWith("MCRFC6") ||
                                                                          ext.ChargeType.StartsWith("MCRFC4") ||
@@ -140,7 +144,8 @@ namespace Paid2Date
                          : yardContainer.Category.StartsWith("EXPRT") ?
                          Convert.ToDateTime(yardContainer.PlugOut).
                          AddHours(ext_Containers.Where(ext => (yardContainer.ContainerNumber.Trim() == ext.ContainerNumber.Trim())
-                                                                         && (yardContainer.TimeIn <= ext.SystemDate)
+                                                                      && ((ten_d_before_time_in <= ext.SystemDate) ||
+                                                                            (yardContainer.TimeIn <= ext.SystemDate))
                                                                          && (ext.ChargeType.StartsWith("MCRFC2") ||
                                                                          ext.ChargeType.StartsWith("MCRFC3"))).Sum(val => val.Quantity)) 
                          : Convert.ToDateTime("1970-01-01 00:00:00");
